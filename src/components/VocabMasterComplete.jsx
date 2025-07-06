@@ -110,6 +110,58 @@ const VocabMasterComplete = () => {
     loadLocalVocab();
   }, [selectedCategory, difficulty]);
 
+  // Función para determinar si un verbo es regular
+  const isRegularVerb = useCallback((verbForms) => {
+    if (!verbForms) return false;
+    return verbForms.past.endsWith('ed') && 
+           verbForms.pastParticiple.endsWith('ed') &&
+           verbForms.presentParticiple.endsWith('ing') &&
+           verbForms.thirdPerson.endsWith('s');
+  }, []);
+
+  // Función para mostrar formas verbales (actualizada)
+  const renderVerbForms = useCallback((word) => {
+    if (!word?.wordType?.toLowerCase().includes('verb')) return null;
+
+    if (!word.verbForms) {
+      return (
+        <div className="mt-6 bg-gray-800/30 rounded-lg p-4 border border-gray-500/50">
+          <h4 className="text-lg font-semibold text-gray-300 mb-3">Formas verbales:</h4>
+          <div className="text-yellow-300">
+            Información de conjugación no disponible para este verbo.
+          </div>
+        </div>
+      );
+    }
+
+    const regular = isRegularVerb(word.verbForms);
+
+    return (
+      <div className={`mt-6 rounded-lg p-4 border ${
+        regular ? 'bg-green-900/30 border-green-500/50' : 'bg-blue-900/30 border-blue-500/50'
+      }`}>
+        <h4 className="text-lg font-semibold text-white mb-3">
+          Formas verbales {regular ? '(Regular)' : '(Irregular)'}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><span className="text-blue-200">Base Form:</span> {word.verbForms.base || word.word}</div>
+          <div><span className="text-blue-200">Past Simple:</span> {word.verbForms.past || "—"}</div>
+          <div><span className="text-blue-200">Past Participle:</span> {word.verbForms.pastParticiple || "—"}</div>
+          <div><span className="text-blue-200">Present Participle:</span> {word.verbForms.presentParticiple || "—"}</div>
+          <div><span className="text-blue-200">3rd Person:</span> {word.verbForms.thirdPerson || "—"}</div>
+        </div>
+        
+        {!regular && (
+          <div className="text-xs text-yellow-300 mt-2 flex items-center">
+            <Zap className="w-3 h-3 mr-1" /> Este verbo tiene conjugaciones irregulares
+          </div>
+        )}
+      </div>
+    );
+  }, [isRegularVerb]);
+
+  // ... (resto de las funciones como createBlankSentence, shuffleArray, prepareMatchingGame, etc. se mantienen igual)
+
   // Función para crear oración con espacio en blanco
   const createBlankSentence = useCallback((word) => {
     if (!word.example) {
@@ -242,7 +294,7 @@ const VocabMasterComplete = () => {
     setUserAnswer('');
     setShowAnswer(false);
     setIsLoadingWord(false);
-  }, [localWords, gameMode]);
+  }, [localWords, gameMode, createBlankSentence]);
 
   // Manejar respuesta de completar oraciones
   const handleFillBlankAnswer = useCallback(() => {
@@ -297,24 +349,6 @@ const VocabMasterComplete = () => {
       case 'low': return 'text-green-600';
       default: return 'text-gray-600';
     }
-  };
-
-  // Función para mostrar formas verbales
-  const renderVerbForms = (word) => {
-    if (!word?.wordType?.toLowerCase().includes('verb')) return null;
-
-    return (
-      <div className="mt-6 bg-blue-900/30 rounded-lg p-4 border border-blue-500/50">
-        <h4 className="text-lg font-semibold text-blue-300 mb-3">Formas verbales:</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><span className="text-blue-200">Base Form:</span> {word.baseForm || word.word}</div>
-          <div><span className="text-blue-200">Past Simple:</span> {word.pastSimple || "—"}</div>
-          <div><span className="text-blue-200">Past Participle:</span> {word.pastParticiple || "—"}</div>
-          <div><span className="text-blue-200">Present Participle:</span> {word.presentParticiple || "—"}</div>
-          <div><span className="text-blue-200">3rd Person:</span> {word.thirdPerson || "—"}</div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -679,7 +713,7 @@ const VocabMasterComplete = () => {
                         </div>
                       )}
 
-                      {/* Mostrar formas verbales solo para verbos */}
+                      {/* Mostrar formas verbales (versión mejorada) */}
                       {renderVerbForms(currentWord)}
                     </div>
                   )}
