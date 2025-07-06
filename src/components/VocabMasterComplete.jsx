@@ -113,14 +113,12 @@ const VocabMasterComplete = () => {
   // Función para crear oración con espacio en blanco
   const createBlankSentence = useCallback((word) => {
     if (!word.example) {
-      // Si no hay ejemplo, crear una oración genérica
       return `The word that means "${word.definition}" is ______.`;
     }
     
     const sentence = word.example;
     const wordToReplace = word.word;
     
-    // Buscar la palabra en diferentes formas (original, lowercase, con mayúscula inicial)
     const variations = [
       wordToReplace,
       wordToReplace.toLowerCase(),
@@ -144,7 +142,6 @@ const VocabMasterComplete = () => {
       return `${beforeWord}______${afterWord}`;
     }
     
-    // Si no se encuentra la palabra en el ejemplo, crear oración genérica
     return `Complete the sentence: The word that means "${word.definition}" is ______.`;
   }, []);
 
@@ -162,7 +159,6 @@ const VocabMasterComplete = () => {
   const prepareMatchingGame = useCallback(() => {
     if (localWords.length < 4) return;
     
-    // Seleccionar 4 palabras aleatorias de las palabras cargadas
     const shuffledWords = shuffleArray(localWords);
     const selectedWords = shuffledWords.slice(0, 4);
     const definitions = selectedWords.map(word => ({ 
@@ -218,7 +214,6 @@ const VocabMasterComplete = () => {
         setMatchingComplete(true);
       }
     } else {
-      // Resetear selecciones después de un breve momento
       setTimeout(() => {
         setSelectedWord(null);
         setSelectedDefinition(null);
@@ -235,7 +230,6 @@ const VocabMasterComplete = () => {
       const word = localWords[randomIndex];
       setCurrentWord(word);
       
-      // Preparar oración con espacio en blanco
       if (gameMode === 'fill_blanks') {
         setBlankSentence(createBlankSentence(word));
         setFillBlankAnswer('');
@@ -257,7 +251,6 @@ const VocabMasterComplete = () => {
     const userAnswerTrimmed = fillBlankAnswer.toLowerCase().trim();
     const correctAnswer = currentWord.word.toLowerCase();
     
-    // Verificar si la respuesta es correcta (comparación case-insensitive)
     const isCorrect = userAnswerTrimmed === correctAnswer;
     
     setFillBlankResult({
@@ -304,6 +297,24 @@ const VocabMasterComplete = () => {
       case 'low': return 'text-green-600';
       default: return 'text-gray-600';
     }
+  };
+
+  // Función para mostrar formas verbales
+  const renderVerbForms = (word) => {
+    if (!word?.wordType?.toLowerCase().includes('verb')) return null;
+
+    return (
+      <div className="mt-6 bg-blue-900/30 rounded-lg p-4 border border-blue-500/50">
+        <h4 className="text-lg font-semibold text-blue-300 mb-3">Formas verbales:</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><span className="text-blue-200">Base Form:</span> {word.baseForm || word.word}</div>
+          <div><span className="text-blue-200">Past Simple:</span> {word.pastSimple || "—"}</div>
+          <div><span className="text-blue-200">Past Participle:</span> {word.pastParticiple || "—"}</div>
+          <div><span className="text-blue-200">Present Participle:</span> {word.presentParticiple || "—"}</div>
+          <div><span className="text-blue-200">3rd Person:</span> {word.thirdPerson || "—"}</div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -392,19 +403,19 @@ const VocabMasterComplete = () => {
               Emparejar Palabras con Definiciones
             </h2>
             
-                {matchingWords.length === 0 && !isLoadingWord && (
-                  <div className="text-center py-8">
-                    <div className="text-yellow-400 text-2xl mb-4">⚠️</div>
-                    <p className="text-white text-lg">
-                      No hay suficientes palabras disponibles para el juego de emparejar.
-                    </p>
-                    <p className="text-gray-300 text-sm mt-2">
-                      Se necesitan al menos 4 palabras. Intenta con otra categoría o nivel.
-                    </p>
-                  </div>
-                )}
+            {matchingWords.length === 0 && !isLoadingWord && (
+              <div className="text-center py-8">
+                <div className="text-yellow-400 text-2xl mb-4">⚠️</div>
+                <p className="text-white text-lg">
+                  No hay suficientes palabras disponibles para el juego de emparejar.
+                </p>
+                <p className="text-gray-300 text-sm mt-2">
+                  Se necesitan al menos 4 palabras. Intenta con otra categoría o nivel.
+                </p>
+              </div>
+            )}
 
-                {matchingWords.length > 0 && (
+            {matchingWords.length > 0 && (
               <>
                 <div className="mb-6">
                   <div className="text-center text-white mb-4">
@@ -667,6 +678,9 @@ const VocabMasterComplete = () => {
                           )}
                         </div>
                       )}
+
+                      {/* Mostrar formas verbales solo para verbos */}
+                      {renderVerbForms(currentWord)}
                     </div>
                   )}
 
